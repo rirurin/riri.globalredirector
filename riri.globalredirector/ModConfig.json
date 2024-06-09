@@ -1,0 +1,21 @@
+{
+  "ModId": "riri.globalredirector",
+  "ModName": "Global Redirector",
+  "ModAuthor": "Rirurin",
+  "ModVersion": "1.0.0",
+  "ModDescription": "Relocates global variables to extend the representing struct/array",
+  "ModDll": "riri.globalredirector.dll",
+  "ModIcon": "Preview.png",
+  "ModR2RManagedDll32": "x86/riri.globalredirector.dll",
+  "ModR2RManagedDll64": "x64/riri.globalredirector.dll",
+  "ModNativeDll32": "",
+  "ModNativeDll64": "",
+  "IsLibrary": false,
+  "ReleaseMetadataFileName": "riri.globalredirector.ReleaseMetadata.json",
+  "PluginData": {},
+  "IsUniversalMod": false,
+  "ModDependencies": [ "reloaded.sharedlib.hooks" ],
+  "OptionalDependencies": [],
+  "SupportedAppId": [],
+  "ProjectUrl": ""
+}
