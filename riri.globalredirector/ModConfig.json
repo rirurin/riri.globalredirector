@@ -10,11 +10,33 @@
   "ModR2RManagedDll64": "x64/riri.globalredirector.dll",
   "ModNativeDll32": "",
   "ModNativeDll64": "",
-  "IsLibrary": false,
+  "IsLibrary": true,
   "ReleaseMetadataFileName": "riri.globalredirector.ReleaseMetadata.json",
-  "PluginData": {},
-  "IsUniversalMod": false,
-  "ModDependencies": [ "reloaded.sharedlib.hooks" ],
+  "PluginData": {
+    "GameBananaDependencies": {
+      "IdToConfigMap": {
+        "SharedScans.Reloaded": {
+          "Config": {
+            "ItemType": "Mod",
+            "ItemId": 495507
+          },
+          "ReleaseMetadataName": "SharedScans.Reloaded.ReleaseMetadata.json"
+        }
+      }
+    },
+    "GitHubRelease": {
+      "UserName": "Rirurin",
+      "RepositoryName": "riri.globalredirector",
+      "UseReleaseTag": true,
+      "AssetFileName": "Mod.zip"
+    }
+  },
+  "IsUniversalMod": true,
+  "ModDependencies": [
+    "reloaded.sharedlib.hooks",
+    "Reloaded.Memory.SigScan.ReloadedII",
+    "SharedScans.Reloaded"
+  ],
   "OptionalDependencies": [],
   "SupportedAppId": [],
   "ProjectUrl": ""
