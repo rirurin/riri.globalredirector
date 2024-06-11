@@ -1,9 +1,9 @@
 {
   "ModId": "riri.globalredirector.testmod",
-  "ModName": "Global Redirector Test Mod",
+  "ModName": "Global Redirector Example Mod",
   "ModAuthor": "Rirurin",
   "ModVersion": "1.0.0",
-  "ModDescription": "Description",
+  "ModDescription": "Example usage of global redirector",
   "ModDll": "riri.globalredirector.testmod.dll",
   "ModIcon": "Preview.png",
   "ModR2RManagedDll32": "x86/riri.globalredirector.testmod.dll",
@@ -15,6 +15,7 @@
   "PluginData": {},
   "IsUniversalMod": false,
   "ModDependencies": [
+    "p5rpc.modloader",
     "reloaded.sharedlib.hooks",
     "Reloaded.Memory.SigScan.ReloadedII",
     "riri.globalredirector",
