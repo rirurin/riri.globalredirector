@@ -99,14 +99,14 @@ namespace riri.globalredirector
             // assumption made by the program that their lifetime is static)
             if (CommittedPages.Count == 0)
             { // We have to commit a new page
-                _context._utils.Log($"first page committed!");
+                //_context._utils.Log($"first page committed!");
                 allocation = CommitLowestSuitablePages((uint)lengthBytes);
             } else
             {
                 // We can slot it inside of an existing allocation
                 if (FindSuitableGap(allocatorCursor, lengthBytes, out var gapAddress))
                 {
-                    _context._utils.Log($"Found suitable gap within existing allocations");
+                    //_context._utils.Log($"Found suitable gap within existing allocations");
                     allocation = gapAddress;
                 }
                 else
@@ -117,20 +117,20 @@ namespace riri.globalredirector
                     }
                     else if (gapAddress + (nuint)lengthBytes < GetLastPageMaxAddress())
                     {
-                        _context._utils.Log($"Found suitable gap.");
+                        //_context._utils.Log($"Found suitable gap.");
                         allocation = gapAddress;
                     } else
                     { // we need to allocate a new area...
-                        _context._utils.Log($"Lowest free page: {GetLowestFreeAddress():X}, gap address {gapAddress:X}");
+                        //_context._utils.Log($"Lowest free page: {GetLowestFreeAddress():X}, gap address {gapAddress:X}");
                         if (FindLowestReservedPage((uint)lengthBytes) == GetLowestFreeAddress())
                         { // this can be contiguous with existing allocations
                             var gapSize = (nuint)lengthBytes - (GetLowestFreeAddress() - gapAddress);
-                            _context._utils.Log($"Found suitable area to make contiguous allocation. size: {gapSize:X}");
+                            //_context._utils.Log($"Found suitable area to make contiguous allocation. size: {gapSize:X}");
                             CommitLowestSuitablePages((uint)gapSize);
                             allocation = gapAddress;
                         } else
                         { // this needs to be separate from everything else
-                            _context._utils.Log($"Found disparate area. Allocating full size.");
+                            //_context._utils.Log($"Found disparate area. Allocating full size.");
                             allocation = CommitLowestSuitablePages((uint)lengthBytes);
                         }
                     }
