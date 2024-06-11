@@ -5,16 +5,24 @@ using Iced.Intel;
 using Decoder = Iced.Intel.Decoder;
 using System.Security.Cryptography;
 using System.Collections.Concurrent;
+using TerraFX.Interop.Windows;
 
 namespace riri.globalredirector
 {
     public class Redirector : ModuleBase<RedirectorContext>
     {
         public ProgramDecoder program { get; private set; }
+
+        private string TraceInstructionFlowscriptSections_SIG = "49 8B 84 ?? ?? ?? ?? ?? 4F 8D 14 ??";
         //private RedirectorApi _api;
         public unsafe Redirector(RedirectorContext context, Dictionary<string, ModuleBase<RedirectorContext>> modules) : base(context, modules)
         {
             program = new ProgramDecoder(_context._fileName, _context._utils, _context._baseAddress);
+            if (Path.GetFileName(_context._fileName).Equals("P5R.exe"))
+            {
+                _context._utils.SigScan(TraceInstructionFlowscriptSections_SIG, "FlowscriptSections", _context._utils.GetDirectAddress,
+                    addr => program.p5rFlowscriptSections = (nuint)_context._baseAddress + *(uint*)(addr + 4));
+            }
         }
         public override void Register()
         {
@@ -38,6 +46,7 @@ namespace riri.globalredirector
         public int SizeOfCode { get; private set; } = 0;
 
         private int? SizeOfGlobalNameColumn = null;
+        public nuint p5rFlowscriptSections { get; set; } = 0;
 
         private Utils _utils;
         public ProgramDecoder(string path, Utils utils, long baseAddress)
@@ -503,37 +512,49 @@ namespace riri.globalredirector
                 var decoder = Decoder.Create(64, codeReader);
                 var time = Stopwatch.StartNew();
                 _utils.Log($"Instr Addr{new string(' ', 0x10 - "Instr Addr".Length)}Func Name{new string(' ', GetSizeOfGlobalNameColumn() - "Func Addr".Length)}Target{new string(' ', "gDatUnit".Length - "Target".Length + 2)}Decoded Instruction");
-                // Flowscript Pass
-                exec.BaseStream.Seek(GetRealAddress(0x1a3d5c0), SeekOrigin.Begin); // we'd get this address by sigscanning in reality
-                List<FlowscriptSectionEntry> flowSections = new();
-                for (int i = 0; i < 6; i++)
-                    flowSections.Add(FlowscriptSectionEntry.Read(exec));
-                foreach (var flowSection in flowSections)
-                {
-                    exec.BaseStream.Seek(GetRealAddress(flowSection.SectionStart), SeekOrigin.Begin);
-                    for (uint i = 0; i < (uint)flowSection.EntryCount; i++)
-                    {
-                        var flowEntry = ScriptCommandFunctionTableEntry.Read(exec);
-                        uint returnPos = flowSection.SectionStart;
-                        unsafe { returnPos += (i + 1) * (uint)sizeof(ScriptCommandFunctionTableEntry); }
-                        exec.BaseStream.Seek(GetRealAddress(flowEntry.Name), SeekOrigin.Begin);
-                        byte[] bNameArea = exec.ReadBytes(32);
-                        string? funcName = null;
-                        unsafe
-                        {
-                            nint pNameArea = (nint)NativeMemory.Alloc((nuint)bNameArea.Length);
-                            Marshal.Copy(bNameArea, 0, pNameArea, bNameArea.Length);
-                            funcName = Marshal.PtrToStringAnsi(pNameArea);
-                            NativeMemory.Free((void*)pNameArea);
-                            if (!DecodedSubroutines.Contains(flowEntry.Fn))
-                                DecodeChildFunction(decoder, exec, flowEntry.Fn, returnPos, funcName);
-                        }
-                    }
-                }
                 // Unwind instruction pass
                 foreach (var fn in FunctionAddresses)
                     if (!DecodedSubroutines.Contains(fn.Value.rip))
                         DecodeChildFunction(decoder, exec, fn.Value.rip, 0);
+                if (Path.GetFileName(ExecutablePath).Equals("P5R.exe"))
+                {
+                    if (p5rFlowscriptSections != 0)
+                    {
+                        _utils.Log($"[P5R] Flowscript Section: 0x{p5rFlowscriptSections:X}");
+                        // Flowscript Pass
+                        exec.BaseStream.Seek(GetRealAddress((uint)(p5rFlowscriptSections - BASE_ADDRESS)), SeekOrigin.Begin); // we'd get this address by sigscanning in reality
+                        List<FlowscriptSectionEntry> flowSections = new();
+                        for (int i = 0; i < 6; i++)
+                            flowSections.Add(FlowscriptSectionEntry.Read(exec));
+
+                        foreach (var flowSection in flowSections)
+                        {
+                            _utils.Log($"Flow section: {flowSection.EntryCount}");
+                            exec.BaseStream.Seek(GetRealAddress(flowSection.SectionStart), SeekOrigin.Begin);
+                            for (uint i = 0; i < (uint)flowSection.EntryCount; i++)
+                            {
+                                var flowEntry = ScriptCommandFunctionTableEntry.Read(exec);
+                                uint returnPos = flowSection.SectionStart;
+                                unsafe { returnPos += (i + 1) * (uint)sizeof(ScriptCommandFunctionTableEntry); }
+                                exec.BaseStream.Seek(GetRealAddress(flowEntry.Name), SeekOrigin.Begin);
+                                byte[] bNameArea = exec.ReadBytes(32);
+                                string? funcName = null;
+                                unsafe
+                                {
+                                    nint pNameArea = (nint)NativeMemory.Alloc((nuint)bNameArea.Length);
+                                    Marshal.Copy(bNameArea, 0, pNameArea, bNameArea.Length);
+                                    funcName = Marshal.PtrToStringAnsi(pNameArea);
+                                    NativeMemory.Free((void*)pNameArea);
+                                    if (!DecodedSubroutines.Contains(flowEntry.Fn))
+                                        DecodeChildFunction(decoder, exec, flowEntry.Fn, returnPos, funcName);
+                                }
+                            }
+                        }
+                    } else
+                    {
+                        _utils.Log($"Warning [P5R]: Couldn't get flowscript section pointer");
+                    }
+                }
                 time.Stop();
                 foreach (var targetArea in TargetAreas)
                     _utils.Log($"{targetArea.Key}: {targetArea.Value.FoundInstances} instances found");
