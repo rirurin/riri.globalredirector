@@ -2,7 +2,7 @@
 using Reloaded.Memory.Interfaces;
 using riri.commonmodutils;
 using riri.globalredirector.Interfaces;
-using System.Collections.Concurrent;
+using System.Runtime.InteropServices;
 
 namespace riri.globalredirector
 {
@@ -15,6 +15,8 @@ namespace riri.globalredirector
             Start = start;
             Length = length;
         }
+
+        public bool IsNull() => Start == 0;
     }
 
     public class TargetArea
@@ -75,22 +77,18 @@ namespace riri.globalredirector
             _allocator = GetModule<AllocatorWin32>();
         }
 
-        public void AddTarget(string name, int length, string sigscan, Func<int, nuint> transformCb)
+        public void AddTargetRaw(string name, int length, string sigscan, Func<int, nuint> transformCb)
         {
             if (bIsDecoded)
             {
                 _context._utils.Log($"ERROR: Can only register a target during initialization", System.Drawing.Color.Red, LogLevel.Error);
                 return;
             }
-            /*
-            _context._utils.SigScan(sigscan, name, transformCb,
-                addr => _context._utils.Log($"found target {name}: {(nint)addr:X}"));
-            */
             TargetsToFind.Add(name);
             _context._utils.SigScan(sigscan, name, transformCb,
                 addr =>
                 {
-                    //_context._utils.Log($"{name}: {(nint)addr:X}");
+                    _context._utils.Log($"found {name}: {(nint)addr:X}");
                     if (_redirector.program.TargetAreas.TryAdd(name, new TargetArea((uint)(addr - _context._baseAddress), (uint)length)))
                     {
                         lock (_targetFindLock)
@@ -101,7 +99,7 @@ namespace riri.globalredirector
                                 bIsDecoded = true;
                                 if (_allocator._minimumPossibleAddress != 0)
                                 {
-                                    //_redirector.program.DecodeProgram();
+                                    _redirector.program.DecodeProgram();
                                 }
                             }
                         }
@@ -112,6 +110,10 @@ namespace riri.globalredirector
                 }
             );
         }
+
+        public unsafe void AddTarget<TGlobalType>(string name, int lengthEntries, string sigscan, Func<int, nuint> transformCb) where TGlobalType : unmanaged
+            => AddTargetRaw(name, lengthEntries * sizeof(TGlobalType), sigscan, transformCb);
+
         private void RedirectPointer(nuint target, KeyValuePair<uint, GlobalReference> location)
         {
             uint newOffset = (location.Value.bIsAbsolute) ?
@@ -125,25 +127,36 @@ namespace riri.globalredirector
                 }
             }
         }
-        public unsafe TGlobalType* ReallocateGlobal<TGlobalType>(TGlobalType* old, string name, int newLength) where TGlobalType : unmanaged
+        public unsafe nuint MoveGlobalRaw(nuint old, string name, int lengthBytes)
         {
-            return null;
-            //return (TGlobalType*)_allocator.CommitLowestReservedPage((uint)newLength);
-            /*
-            if (old != null) // handle relocation
+            if (!_redirector.program.TargetAreas.TryGetValue(name, out var targetArea))
             {
-
+                _context._utils.Log($"Error: Couldn't find the target \"{name}\". Make sure you added this target using the AddTarget() or AddTargetRaw() methods.", System.Drawing.Color.Red, LogLevel.Error);
+                return 0;
             }
-            */
-            // Look for the first area that contains a suitable area
-            /*
-            if (_redirector.program.TargetAreas.TryGetValue(name, out var targets))
+            Slice dataToCopy;
+            if (old != 0) // we're grabbing from the original global
             {
-                foreach (var location in targets.Locations)
-                    RedirectPointer(target, location);
+                _context._utils.Log($"TODO: Implement moving already moved globals");
+                return 0;
             }
-            */
-            return null;
+            dataToCopy = targetArea.Range;
+            // Make allocation
+            var alloc = _allocator.Allocate(lengthBytes, name);
+            if (alloc == 0)
+            {
+                _context._utils.Log($"Error: Allocation failed, passed maximum allowed address.", System.Drawing.Color.Red, LogLevel.Error);
+                return 0;
+            }
+            // Move contents
+            _context._utils.Log($"{name} ALLOC: {(nint)alloc:X}, copy from {_context._baseAddress + dataToCopy.Start:X}, length {dataToCopy.Length:X}");
+            NativeMemory.Copy((void*)(_context._baseAddress + dataToCopy.Start), (void*)alloc, dataToCopy.Length);
+            // Redirect pointers
+            foreach (var location in targetArea.Locations)
+                RedirectPointer(alloc, location);
+            return alloc;
         }
+        public unsafe TGlobalType* MoveGlobal<TGlobalType>(TGlobalType* old, string name, int newLength) where TGlobalType : unmanaged
+            => (TGlobalType*)MoveGlobalRaw((nuint)old, name, newLength * sizeof(TGlobalType));
     }
 }

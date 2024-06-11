@@ -44,6 +44,7 @@ namespace riri.globalredirector.testmod
             _context = new(baseAddress, _configuration, _logger, startupScanner, _hooks,
                 _modLoader.GetDirectoryForModId(_modConfig.ModId), utils, memory, sharedScans, redirector);
             _runtime = new(_context);
+            _runtime.AddModule<PartyMember>();
             _runtime.RegisterModules();
         }
 

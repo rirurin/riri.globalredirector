@@ -14,7 +14,7 @@ namespace riri.globalredirector
         //private RedirectorApi _api;
         public unsafe Redirector(RedirectorContext context, Dictionary<string, ModuleBase<RedirectorContext>> modules) : base(context, modules)
         {
-            program = new ProgramDecoder(_context._fileName, _context._utils);
+            program = new ProgramDecoder(_context._fileName, _context._utils, _context._baseAddress);
         }
         public override void Register()
         {
@@ -25,8 +25,7 @@ namespace riri.globalredirector
     {
         private static int REQUIRED_ALIGNOF = 0x10;
         public ConcurrentDictionary<string, TargetArea> TargetAreas { get; set; } = new();
-
-        public static nuint BASE_ADDRESS = (nuint)0x140000000;
+        public static nuint BASE_ADDRESS { get; private set; }
         public string ExecutablePath { get; private set; }
         public Dictionary<Slice, uint> VirtualToPhysicalAddress { get; set; } = new();
         public List<(Slice Bounds, string Name)> Sections { get; private set; } = new();
@@ -41,10 +40,11 @@ namespace riri.globalredirector
         private int? SizeOfGlobalNameColumn = null;
 
         private Utils _utils;
-        public ProgramDecoder(string path, Utils utils)
+        public ProgramDecoder(string path, Utils utils, long baseAddress)
         {
             ExecutablePath = path;
             _utils = utils;
+            BASE_ADDRESS = (nuint)baseAddress;
         }
         public uint GetRealAddress(uint offset)
         {

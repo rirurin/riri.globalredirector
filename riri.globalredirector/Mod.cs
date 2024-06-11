@@ -48,13 +48,6 @@ namespace riri.globalredirector
             _runtime.AddModule<RedirectorApi>();
             _runtime.RegisterModules();
             _modLoader.AddOrReplaceController<IRedirectorApi>(_owner, _runtime.GetModule<RedirectorApi>());
-            _modLoader.OnModLoaderInitialized += ModLoaderInitialzed;
-        }
-
-        public void ModLoaderInitialzed()
-        {
-            _runtime.GetModule<AllocatorWin32>().OnLoaderInitialized();
-            _modLoader.OnModLoaderInitialized -= ModLoaderInitialzed;
         }
 
         private IControllerType GetDependency<IControllerType>(string modName) where IControllerType : class
