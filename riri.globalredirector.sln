@@ -4,11 +4,11 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "riri.globalredirector", "riri.globalredirector\riri.globalredirector.csproj", "{B37CD197-F399-4DB5-A4C5-AA60B62AF745}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedScans.Interfaces", "..\p3rpc.nativetypes\include\SharedScans\SharedScans.Interfaces\SharedScans.Interfaces.csproj", "{CAFFAC2C-6EA7-494A-ADE6-6BE0994959F9}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "riri.globalredirector.Interfaces", "riri.globalredirector.Interfaces\riri.globalredirector.Interfaces.csproj", "{D1EF779A-915E-4AAF-AEA6-4FCBD0AA9396}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "riri.globalredirector.testmod", "riri.globalredirector.testmod\riri.globalredirector.testmod.csproj", "{5C4BA7FD-5098-4D64-B9AE-835A4FCEA9A8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedScans.Interfaces", "include\SharedScans\SharedScans.Interfaces\SharedScans.Interfaces.csproj", "{77F1777E-7AC6-494F-8399-1CDC37A45F9C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,10 +20,6 @@ Global
 		{B37CD197-F399-4DB5-A4C5-AA60B62AF745}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B37CD197-F399-4DB5-A4C5-AA60B62AF745}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B37CD197-F399-4DB5-A4C5-AA60B62AF745}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CAFFAC2C-6EA7-494A-ADE6-6BE0994959F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CAFFAC2C-6EA7-494A-ADE6-6BE0994959F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CAFFAC2C-6EA7-494A-ADE6-6BE0994959F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CAFFAC2C-6EA7-494A-ADE6-6BE0994959F9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D1EF779A-915E-4AAF-AEA6-4FCBD0AA9396}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D1EF779A-915E-4AAF-AEA6-4FCBD0AA9396}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1EF779A-915E-4AAF-AEA6-4FCBD0AA9396}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -32,6 +28,10 @@ Global
 		{5C4BA7FD-5098-4D64-B9AE-835A4FCEA9A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C4BA7FD-5098-4D64-B9AE-835A4FCEA9A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C4BA7FD-5098-4D64-B9AE-835A4FCEA9A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77F1777E-7AC6-494F-8399-1CDC37A45F9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77F1777E-7AC6-494F-8399-1CDC37A45F9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77F1777E-7AC6-494F-8399-1CDC37A45F9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77F1777E-7AC6-494F-8399-1CDC37A45F9C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -45,7 +45,7 @@
     <PackageReference Include="TerraFX.Interop.Windows" Version="10.0.22621.6" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\p3rpc.nativetypes\include\SharedScans\SharedScans.Interfaces\SharedScans.Interfaces.csproj" />
+    <ProjectReference Include="..\include\SharedScans\SharedScans.Interfaces\SharedScans.Interfaces.csproj" />
     <ProjectReference Include="..\riri.globalredirector.Interfaces\riri.globalredirector.Interfaces.csproj" />
   </ItemGroup>
 </Project>
