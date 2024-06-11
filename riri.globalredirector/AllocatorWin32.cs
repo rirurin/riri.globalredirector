@@ -1,6 +1,8 @@
 ﻿using riri.commonmodutils;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using TerraFX.Interop.Windows;
+using static TerraFX.Interop.Windows.Windows;
 
 namespace riri.globalredirector
 {
@@ -27,12 +29,9 @@ namespace riri.globalredirector
 
         public unsafe void OnLoaderInitialized()
         {
-            _context._utils.Log($"Sleeping KernelTest thread...");
-            Thread.Sleep(10000);
-            var pSystemInfo = (Kernel32.SYSTEM_INFO*)NativeMemory.Alloc((nuint)sizeof(Kernel32.SYSTEM_INFO));
-            Kernel32.GetSystemInfo(pSystemInfo);
-            WordSize = pSystemInfo->dwPageSize;
-            NativeMemory.Free(pSystemInfo);
+            var systemInfo = new SYSTEM_INFO();
+            GetSystemInfo(&systemInfo);
+            WordSize = systemInfo.dwPageSize;
             _context._utils.Log($"WORD SIZE: 0x{WordSize:X}");
             _minimumPossibleAddress = FindLowestReservedPage(WordSize);
             _context._utils.Log($"Lowest available page is at 0x{_minimumPossibleAddress:X}");
@@ -42,26 +41,26 @@ namespace riri.globalredirector
             nuint lowestPossiblePage = (CommittedPages.Count == 0) 
                 ? (nuint)(_context._baseAddress + _context._processModuleSize)
                 : CommittedPages.Last().Key + CommittedPages.Last().Value;
-            var pPageQuery = (Kernel32._MEMORY_BASIC_INFORMATION*)NativeMemory.Alloc((nuint)sizeof(Kernel32._MEMORY_BASIC_INFORMATION));
+            var pageQuery = new MEMORY_BASIC_INFORMATION();
             nuint lowestReservedPage = 0;
             // Find the earliest reserved page
             while (lowestReservedPage == 0 && lowestPossiblePage < _maximumPossibleAddress)
             {
-                Kernel32.VirtualQuery(lowestPossiblePage, pPageQuery, sizeof(Kernel32._MEMORY_BASIC_INFORMATION));
-                _context._utils.Log($"base address 0x{pPageQuery->BaseAddress:X}, allocation 0x{pPageQuery->AllocationBase:X}, size 0x{pPageQuery->RegionSize:X}, state {pPageQuery->State}");
-                if (pPageQuery->State == Kernel32.MEMORY_BASIC_INFO_STATE.MEM_RESERVE
-                    && pPageQuery->RegionSize > minimumSize)
-                    lowestReservedPage = pPageQuery->BaseAddress;
-                lowestPossiblePage += pPageQuery->RegionSize;
+                VirtualQuery((void*)lowestPossiblePage, &pageQuery, (nuint)sizeof(MEMORY_BASIC_INFORMATION));
+                _context._utils.Log($"base address 0x{(nint)pageQuery.BaseAddress:X}, allocation 0x{(nint)pageQuery.AllocationBase:X}, size 0x{pageQuery.RegionSize:X}, state {pageQuery.State}");
+                if (pageQuery.State == 0x2000 // MEM_RESERVE
+                    && pageQuery.RegionSize > minimumSize)
+                    lowestReservedPage = (nuint)pageQuery.BaseAddress;
+                lowestPossiblePage += pageQuery.RegionSize;
             }
-            NativeMemory.Free(pPageQuery);
             return lowestReservedPage;
         }
 
+        /*
         public unsafe nuint CommitLowestReservedPage(uint pageTotalSize)
         {
-            var newlyCommittedBase = Kernel32.VirtualAlloc(FindLowestReservedPage(pageTotalSize), pageTotalSize,
-                Kernel32.MEM_ALLOCATION_TYPE.MEM_COMMIT, Kernel32.MEM_PROTECTION.PAGE_EXECUTE_READWRITE);
+            var newlyCommittedBase = (nuint)VirtualAlloc((void*)FindLowestReservedPage(pageTotalSize), pageTotalSize,
+                0x1000, 0x40);
             CommittedPages.Add(newlyCommittedBase, pageTotalSize);
             return newlyCommittedBase;
         }
@@ -76,5 +75,6 @@ namespace riri.globalredirector
         {
             //Kernel32.VirtualAlloc();
         }
+        */
     }
 }

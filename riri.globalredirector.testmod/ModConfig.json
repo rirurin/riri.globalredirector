@@ -1,0 +1,28 @@
+{
+  "ModId": "riri.globalredirector.testmod",
+  "ModName": "Global Redirector Test Mod",
+  "ModAuthor": "Rirurin",
+  "ModVersion": "1.0.0",
+  "ModDescription": "Description",
+  "ModDll": "riri.globalredirector.testmod.dll",
+  "ModIcon": "Preview.png",
+  "ModR2RManagedDll32": "x86/riri.globalredirector.testmod.dll",
+  "ModR2RManagedDll64": "x64/riri.globalredirector.testmod.dll",
+  "ModNativeDll32": "",
+  "ModNativeDll64": "",
+  "IsLibrary": false,
+  "ReleaseMetadataFileName": "riri.globalredirector.testmod.ReleaseMetadata.json",
+  "PluginData": {},
+  "IsUniversalMod": false,
+  "ModDependencies": [
+    "reloaded.sharedlib.hooks",
+    "Reloaded.Memory.SigScan.ReloadedII",
+    "riri.globalredirector",
+    "SharedScans.Reloaded"
+  ],
+  "OptionalDependencies": [],
+  "SupportedAppId": [
+    "p5r.exe"
+  ],
+  "ProjectUrl": ""
+}

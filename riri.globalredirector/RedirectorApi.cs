@@ -127,7 +127,8 @@ namespace riri.globalredirector
         }
         public unsafe TGlobalType* ReallocateGlobal<TGlobalType>(TGlobalType* old, string name, int newLength) where TGlobalType : unmanaged
         {
-            return (TGlobalType*)_allocator.CommitLowestReservedPage((uint)newLength);
+            return null;
+            //return (TGlobalType*)_allocator.CommitLowestReservedPage((uint)newLength);
             /*
             if (old != null) // handle relocation
             {
